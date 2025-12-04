@@ -47,7 +47,6 @@ export async function POST(request: NextRequest) {
   console.log('Request method:', request.method);
   
   try {
-  try {
     if (!NILLION_CONFIG.BUILDER_PRIVATE_KEY) {
       return NextResponse.json(
         { success: false, error: 'Missing NILLION_BUILDER_PRIVATE_KEY' },
