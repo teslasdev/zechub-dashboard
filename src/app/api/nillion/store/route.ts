@@ -21,7 +21,7 @@ const NILLION_CONFIG = {
         'https://nildb-stg-n2.nillion.network',
         'https://nildb-stg-n3.nillion.network'
       ],
-  BUILDER_PRIVATE_KEY: process.env.NILLION_BUILDER_PRIVATE_KEY,
+  BUILDER_PRIVATE_KEY: process.env.NILLION_BUILDER_PRIVATE_KEY || '6ccef9032994e3873feb9673cbe68788b7c620b58336c7c86e6639c4ac8553a5',
 };
 
 const COLLECTION_ID = 'zcash-analytics-collection';
