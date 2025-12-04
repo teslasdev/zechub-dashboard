@@ -24,9 +24,9 @@ export interface PrivateAnalyticsData {
 
 // Aggregated analytics (computed confidentially)
 export interface AggregatedAnalytics {
-  totalUsers: number;
+  totalRecords: number;
   totalPageViews: number;
-  averageSessionDuration: number;
+  avgSessionDuration: number;
   totalInteractions: number;
   timeRange: {
     start: string;

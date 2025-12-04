@@ -37,6 +37,7 @@ export default function PrivacyAnalyticsPage() {
     const service = getNillionService();
     const result = await service.computeAggregatedAnalytics();
 
+    console.log(result);
     if (result.success && result.data) {
       setAggregatedData(result.data);
     }
@@ -225,7 +226,7 @@ export default function PrivacyAnalyticsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <div className="bg-linear-to-br from-blue-900/20 to-blue-800/10 border border-blue-500/20 rounded-lg p-4 sm:p-6">
                 <div className="text-blue-400 text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Total Users</div>
-                <div className="text-2xl sm:text-3xl font-bold">{aggregatedData.totalUsers}</div>
+                <div className="text-2xl sm:text-3xl font-bold">{aggregatedData.totalRecords}</div>
               </div>
 
               <div className="bg-linear-to-br from-purple-900/20 to-purple-800/10 border border-purple-500/20 rounded-lg p-4 sm:p-6">
@@ -235,7 +236,7 @@ export default function PrivacyAnalyticsPage() {
 
               <div className="bg-linear-to-br from-green-900/20 to-green-800/10 border border-green-500/20 rounded-lg p-4 sm:p-6">
                 <div className="text-green-400 text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Avg Session (sec)</div>
-                <div className="text-2xl sm:text-3xl font-bold">{aggregatedData.averageSessionDuration}</div>
+                <div className="text-2xl sm:text-3xl font-bold">{aggregatedData.avgSessionDuration}</div>
               </div>
 
               <div className="bg-linear-to-br from-orange-900/20 to-orange-800/10 border border-orange-500/20 rounded-lg p-4 sm:p-6">

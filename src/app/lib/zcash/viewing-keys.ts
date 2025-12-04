@@ -26,24 +26,30 @@ export class ViewingKeyManager {
 
   /**
    * Validate viewing key format
+   * Simple validation - just check basic format requirements
    */
   static validateViewingKey(key: string, type: ViewingKey['type']): boolean {
+    // Basic validation: minimum length and alphanumeric check
+    if (!key || key.length < 50) {
+      return false;
+    }
+
+    // Very flexible patterns - accept any reasonable viewing key format
     const patterns = {
-      unified: /^uview1[a-z0-9]{141}$/i,
-      sapling: /^zxviews[a-z0-9]{95}$/i,
-      orchard: /^orchard[a-z0-9]{95}$/i,
+      unified: /^uview/i,        // Any unified viewing key (uview1..., uviewtest1...)
+      sapling: /^zxview/i,       // Any sapling viewing key (zxviews..., zxviewtestsapling1...)
+      orchard: /^(orchard|zxview)/i,  // Any orchard viewing key
     };
 
-    return patterns[type]?.test(key) || false;
+    const pattern = patterns[type];
+    return pattern ? pattern.test(key) : false;
   }
 
   /**
    * Add a viewing key
    */
   addKey(key: string, type: ViewingKey['type'], label?: string): boolean {
-    if (!ViewingKeyManager.validateViewingKey(key, type)) {
-      return false;
-    }
+    
 
     const keyId = this.generateKeyId(key);
     this.keys.set(keyId, { type, key, label });

@@ -13,6 +13,7 @@ const Page = () => {
   const [transactions, setTransactions] = useState<ShieldedTransaction[]>([]);
   const [searchTxid, setSearchTxid] = useState("");
   const [currentTx, setCurrentTx] = useState<Transaction | null>(null);
+  const [searching, setSearching] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 });
   const [activeTab, setActiveTab] = useState<'keys' | 'search' | 'scan'>('keys');
@@ -47,11 +48,16 @@ const Page = () => {
   const handleSearchTransaction = async () => {
     if (!searchTxid.trim()) return;
 
+    setSearching(true);
+    setCurrentTx(null);
+
     try {
       const tx = await blockExplorer.getTransaction(searchTxid);
       setCurrentTx(tx);
     } catch (error) {
       alert("Transaction not found or network error");
+    } finally {
+      setSearching(false);
     }
   };
 
@@ -66,37 +72,17 @@ const Page = () => {
 
     try {
       const latestHeight = await blockExplorer.getLatestBlockHeight();
-      const startBlock = Math.max(latestHeight - 1000, 0); // Scan last 1000 blocks for demo
       
-      // For demo purposes, simulate scanning with the first key
-      const demoTransactions: ShieldedTransaction[] = [
-        {
-          txid: `demo-tx-${Date.now()}-1`,
-          blockHeight: latestHeight - 10,
-          timestamp: Date.now() - 3600000,
-          amount: 1.234,
-          memo: "Payment for services",
-          address: "zs1...abc123",
-          type: "received",
-          pool: "sapling",
-          decrypted: true,
-        },
-        {
-          txid: `demo-tx-${Date.now()}-2`,
-          blockHeight: latestHeight - 50,
-          timestamp: Date.now() - 86400000,
-          amount: 0.567,
-          memo: "Monthly subscription",
-          address: "zs1...def456",
-          type: "sent",
-          pool: "sapling",
-          decrypted: true,
-        },
-      ];
-
-      setTransactions(demoTransactions);
+      if (!latestHeight) {
+        alert("Failed to fetch blockchain data from Blockchair");
+        return;
+      }
+      
+      alert(`⚠️ Blockchain Scanning Limitation\n\nBlockchair API doesn't provide the cryptographic data needed to decrypt shielded transactions with viewing keys.\n\nTo use this feature, you would need:\n• A full Zcash node with RPC access\n• Or a specialized API that provides shielded pool data\n• Or use Zcash-specific wallets like Ywallet or Zingo\n\nLatest block height: ${latestHeight.toLocaleString()}\n\nYou can still use the "Search TX" tab to look up any transaction by ID!`);
+      
     } catch (error) {
-      alert("Error scanning blockchain");
+      console.error("Scan error:", error);
+      alert("Error connecting to Blockchair API");
     } finally {
       setScanning(false);
     }
@@ -207,18 +193,15 @@ const Page = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
-                    Viewing Key (Testnet)
+                    Viewing Key
                   </label>
                   <input
                     type="text"
                     value={viewingKey}
                     onChange={(e) => setViewingKey(e.target.value)}
-                    placeholder="zxviewtestsapling1..."
+                    placeholder="Enter View Key"
                     className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-white focus:outline-none focus:border-blue-500 font-mono"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Example: zxviewtestsapling1q0duytgcqqqqpqre26wkl45...
-                  </p>
                 </div>
 
                 <div>
@@ -288,12 +271,20 @@ const Page = () => {
                   onChange={(e) => setSearchTxid(e.target.value)}
                   placeholder="Enter transaction ID..."
                   className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-white focus:outline-none focus:border-blue-500 font-mono"
+                  disabled={searching}
                 />
                 <button
                   onClick={handleSearchTransaction}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition whitespace-nowrap"
+                  disabled={searching || !searchTxid.trim()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Search
+                  {searching && (
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  )}
+                  {searching ? 'Searching...' : 'Search'}
                 </button>
               </div>
             </div>
@@ -307,10 +298,19 @@ const Page = () => {
                     <span className="text-gray-400 font-semibold min-w-[120px]">TXID:</span>
                     <span className="text-white font-mono break-all">{currentTx.txid}</span>
                   </div>
+                  
                   <div className="flex flex-col sm:flex-row gap-2">
-                    <span className="text-gray-400 font-semibold min-w-[120px]">Height:</span>
-                    <span className="text-white">{currentTx.height}</span>
+                    <span className="text-gray-400 font-semibold min-w-[120px]">Block Height:</span>
+                    <span className="text-white">{currentTx.height.toLocaleString()}</span>
                   </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <span className="text-gray-400 font-semibold min-w-[120px]">Timestamp:</span>
+                    <span className="text-white">
+                      {new Date(currentTx.time * 1000).toLocaleString()}
+                    </span>
+                  </div>
+                  
                   <div className="flex flex-col sm:flex-row gap-2">
                     <span className="text-gray-400 font-semibold min-w-[120px]">Type:</span>
                     <span className={`inline-block px-3 py-1 rounded text-xs sm:text-sm ${
@@ -321,7 +321,106 @@ const Page = () => {
                       {currentTx.hasShielded ? '🔒 Shielded' : 'Transparent'}
                     </span>
                   </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <span className="text-gray-400 font-semibold min-w-[120px]">Version:</span>
+                    <span className="text-white">{currentTx.version}</span>
+                  </div>
+                  
+                  {currentTx.vShieldedSpend && currentTx.vShieldedSpend.length > 0 && (
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <span className="text-gray-400 font-semibold min-w-[120px]">Shielded Spends:</span>
+                      <span className="text-green-400">{currentTx.vShieldedSpend.length}</span>
+                    </div>
+                  )}
+                  
+                  {currentTx.vShieldedOutput && currentTx.vShieldedOutput.length > 0 && (
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <span className="text-gray-400 font-semibold min-w-[120px]">Shielded Outputs:</span>
+                      <span className="text-green-400">{currentTx.vShieldedOutput.length}</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <span className="text-gray-400 font-semibold min-w-[120px]">Transparent Inputs:</span>
+                    <span className="text-white">{currentTx.vin.length}</span>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <span className="text-gray-400 font-semibold min-w-[120px]">Transparent Outputs:</span>
+                    <span className="text-white">{currentTx.vout.length}</span>
+                  </div>
+                  
+                  {currentTx.valueBalance !== undefined && currentTx.valueBalance !== 0 && (
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <span className="text-gray-400 font-semibold min-w-[120px]">Value Balance:</span>
+                      <span className="text-white">{(currentTx.valueBalance / 100000000).toFixed(8)} ZEC</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <span className="text-gray-400 font-semibold min-w-[120px]">Lock Time:</span>
+                    <span className="text-white">{currentTx.locktime}</span>
+                  </div>
                 </div>
+
+                {/* Transparent Inputs Details */}
+                {currentTx.vin.length > 0 && (
+                  <div className="mt-6">
+                    <h5 className="text-md sm:text-lg font-bold mb-3 text-blue-400">Inputs ({currentTx.vin.length})</h5>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {currentTx.vin.map((input: any, idx: number) => (
+                        <div key={idx} className="bg-gray-800/50 p-3 rounded text-xs sm:text-sm">
+                          <div className="flex gap-2 mb-1">
+                            <span className="text-gray-400">#{idx}:</span>
+                            <span className="text-gray-300 font-mono break-all">
+                              {input.recipient || input.addresses?.[0] || 'N/A'}
+                            </span>
+                          </div>
+                          {input.value !== undefined && (
+                            <div className="text-green-400">
+                              Value: {(input.value / 100000000).toFixed(8)} ZEC
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Transparent Outputs Details */}
+                {currentTx.vout.length > 0 && (
+                  <div className="mt-6">
+                    <h5 className="text-md sm:text-lg font-bold mb-3 text-purple-400">Outputs ({currentTx.vout.length})</h5>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {currentTx.vout.map((output: any, idx: number) => (
+                        <div key={idx} className="bg-gray-800/50 p-3 rounded text-xs sm:text-sm">
+                          <div className="flex gap-2 mb-1">
+                            <span className="text-gray-400">#{idx}:</span>
+                            <span className="text-gray-300 font-mono break-all">
+                              {output.recipient || output.addresses?.[0] || output.scriptPubKey?.addresses?.[0] || 'N/A'}
+                            </span>
+                          </div>
+                          {output.value !== undefined && (
+                            <div className="text-green-400">
+                              Value: {(output.value / 100000000).toFixed(8)} ZEC
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Privacy Info */}
+                {currentTx.hasShielded && (
+                  <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+                    <p className="text-xs sm:text-sm text-green-300">
+                      <strong>🔒 Privacy Note:</strong> This transaction uses shielded pools. 
+                      To view amounts and memos, you need the corresponding viewing key.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -331,11 +430,21 @@ const Page = () => {
         {activeTab === 'scan' && (
           <div className="space-y-6">
             <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 sm:p-6">
-              <h4 className="text-lg sm:text-xl font-bold mb-4">Scan for Your Transactions</h4>
+              <h4 className="text-lg sm:text-xl font-bold mb-4">Blockchain Scanning</h4>
+              
+              <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-4">
+                <p className="text-sm text-yellow-300 mb-2">
+                  <strong>⚠️ Scanning Limitation:</strong>
+                </p>
+                <p className="text-xs sm:text-sm text-yellow-200">
+                  Blockchair API doesn't provide the cryptographic data needed to decrypt shielded transactions with viewing keys.
+                  For full viewing key functionality, you would need a full Zcash node or specialized wallet software like Ywallet or Zingo.
+                </p>
+              </div>
               
               <p className="text-sm sm:text-base text-gray-400 mb-4">
-                Scan the blockchain to find all transactions related to your viewing keys.
-                This process happens entirely on your device.
+                You can still use the <strong>"Search TX"</strong> tab to look up any transaction by ID 
+                and view its structure (transparent/shielded components).
               </p>
 
               <button

@@ -34,13 +34,25 @@ export class ZcashBlockExplorer {
   private rpcUrl: string;
   private isTestnet: boolean;
   private cache: Map<string, any> = new Map();
+  private apiKey?: string;
 
   constructor(rpcUrl?: string, isTestnet: boolean = true) {
-    // Use testnet by default for development
+    // Use API proxy to avoid CORS
     this.isTestnet = isTestnet;
-    this.rpcUrl = rpcUrl || (isTestnet 
-      ? 'https://testnet.zcashexplorer.app/api'
-      : 'https://api.zcha.in');
+    this.rpcUrl = rpcUrl || '/api/zcash';
+  }
+
+  /**
+   * Make request through our API proxy (avoids CORS)
+   */
+  private async fetchWithAuth(endpoint: string): Promise<Response> {
+    const url = `${this.rpcUrl}?endpoint=${encodeURIComponent(endpoint)}`;
+    
+    return fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   }
 
   /**
@@ -53,26 +65,34 @@ export class ZcashBlockExplorer {
     }
 
     try {
-      const network = this.isTestnet ? 'testnet' : 'mainnet';
-      // Try multiple explorers for better reliability
-      let response;
+      // Blockchair format: /dashboards/block/{height}
+      const response = await this.fetchWithAuth(
+        `dashboards/block/${heightOrHash}`
+      );
       
-      // Try Zcash block explorer first
-      try {
-        response = await fetch(`${this.rpcUrl}/block/${heightOrHash}`);
-      } catch (err) {
-        // Fallback to alternative explorers
-        const fallbackUrl = this.isTestnet 
-          ? `https://explorer.testnet.z.cash/api/block/${heightOrHash}`
-          : `https://api.zcha.in/v2/mainnet/blocks/${heightOrHash}`;
-        response = await fetch(fallbackUrl);
+      if (!response.ok) {
+        console.error(`Block fetch failed: ${response.status} ${response.statusText}`);
+        return null;
       }
       
-      if (!response.ok) return null;
+      const result = await response.json();
+      const blockData = result.data?.[heightOrHash];
       
-      const block = await response.json();
-      this.cache.set(cacheKey, block);
-      return block;
+      if (blockData?.block) {
+        const block = {
+          hash: blockData.block.hash,
+          height: blockData.block.id,
+          time: new Date(blockData.block.time).getTime() / 1000,
+          tx: blockData.transactions?.map((tx: any) => tx.hash) || [],
+          size: blockData.block.size,
+          difficulty: blockData.block.difficulty,
+          chainwork: ''
+        };
+        this.cache.set(cacheKey, block);
+        return block;
+      }
+      
+      return null;
     } catch (error) {
       console.error('Failed to fetch block:', error);
       return null;
@@ -89,32 +109,40 @@ export class ZcashBlockExplorer {
     }
 
     try {
-      let response;
-      
-      // Try multiple endpoints
-      try {
-        response = await fetch(`${this.rpcUrl}/tx/${txid}`);
-      } catch (err) {
-        // Fallback to alternative testnet explorer
-        const fallbackUrl = this.isTestnet 
-          ? `https://explorer.testnet.z.cash/api/tx/${txid}`
-          : `https://api.zcha.in/v2/mainnet/transactions/${txid}`;
-        response = await fetch(fallbackUrl);
-      }
-      
-      if (!response.ok) return null;
-      
-      const tx = await response.json();
-      
-      // Mark if transaction has shielded components
-      tx.hasShielded = !!(
-        tx.vShieldedSpend?.length ||
-        tx.vShieldedOutput?.length ||
-        tx.vJoinSplit?.length
+      // Blockchair format: /dashboards/transaction/{txid}
+      const response = await this.fetchWithAuth(
+        `dashboards/transaction/${txid}`
       );
       
-      this.cache.set(cacheKey, tx);
-      return tx;
+      if (!response.ok) {
+        console.error(`Transaction fetch failed: ${response.status} ${response.statusText}`);
+        return null;
+      }
+      
+      const result = await response.json();
+      const txData = result.data?.[txid];
+      
+      if (txData?.transaction) {
+        const tx: Transaction = {
+          txid: txData.transaction.hash,
+          version: txData.transaction.version,
+          locktime: txData.transaction.lock_time,
+          vin: txData.inputs || [],
+          vout: txData.outputs || [],
+          vShieldedSpend: txData.transaction.shielded_spend || [],
+          vShieldedOutput: txData.transaction.shielded_output || [],
+          vJoinSplit: [],
+          valueBalance: 0,
+          height: txData.transaction.block_id,
+          time: new Date(txData.transaction.time).getTime() / 1000,
+          hasShielded: !!(txData.transaction.shielded_spend?.length || txData.transaction.shielded_output?.length)
+        };
+        
+        this.cache.set(cacheKey, tx);
+        return tx;
+      }
+      
+      return null;
     } catch (error) {
       console.error('Failed to fetch transaction:', error);
       return null;
@@ -129,13 +157,15 @@ export class ZcashBlockExplorer {
     limit: number = 10
   ): Promise<Transaction[]> {
     try {
-      const response = await fetch(
-        `${this.rpcUrl}/v2/mainnet/accounts/${address}/recv?limit=${limit}&sort=timestamp&direction=descending`
+      // Blockchair format: /dashboards/address/{address}
+      const response = await this.fetchWithAuth(
+        `dashboards/address/${address}?limit=${limit}`
       );
       
       if (!response.ok) return [];
-      const data = await response.json();
-      return data || [];
+      const result = await response.json();
+      const data = result.data?.[address]?.transactions || [];
+      return data;
     } catch (error) {
       console.error('Failed to search transactions:', error);
       return [];
@@ -184,27 +214,16 @@ export class ZcashBlockExplorer {
    */
   async getLatestBlockHeight(): Promise<number> {
     try {
-      let response;
+      // Blockchair format: /stats
+      const response = await this.fetchWithAuth(`stats`);
       
-      try {
-        response = await fetch(`${this.rpcUrl}/status`);
-        if (response.ok) {
-          const data = await response.json();
-          return data.blocks || data.blockbook?.bestHeight || 0;
-        }
-      } catch (err) {
-        // Fallback
-        const fallbackUrl = this.isTestnet 
-          ? 'https://explorer.testnet.z.cash/api/status'
-          : 'https://api.zcha.in/v2/mainnet/blocks?limit=1&sort=height&direction=descending';
-        response = await fetch(fallbackUrl);
+      if (!response.ok) {
+        console.error(`Latest block fetch failed: ${response.status} ${response.statusText}`);
+        return 0;
       }
       
-      if (!response.ok) return 0;
-      
-      const data = await response.json();
-      // Handle different API response formats
-      return data.blocks || data.blockbook?.bestHeight || data[0]?.height || 0;
+      const result = await response.json();
+      return result.data?.blocks || 0;
     } catch (error) {
       console.error('Failed to fetch latest block:', error);
       return 0;
