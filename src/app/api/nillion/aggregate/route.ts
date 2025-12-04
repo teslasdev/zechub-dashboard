@@ -25,7 +25,24 @@ const NILLION_CONFIG = {
 
 const COLLECTION_ID = 'zcash-analytics-collection';
 
+// GET endpoint for health check
+export async function GET(request: NextRequest) {
+  return NextResponse.json({
+    status: 'ok',
+    message: 'Nillion Aggregate API is available',
+    config: {
+      hasPrivateKey: !!NILLION_CONFIG.BUILDER_PRIVATE_KEY,
+      nilchainUrl: NILLION_CONFIG.NILCHAIN_URL,
+      nilauthUrl: NILLION_CONFIG.NILAUTH_URL,
+      nodeCount: NILLION_CONFIG.NILDB_NODES.length,
+    },
+    usage: 'POST to this endpoint to compute aggregated analytics confidentially',
+  });
+}
+
 export async function POST(request: NextRequest) {
+  console.log('🔵 Nillion Aggregate API called');
+  
   try {
     if (!NILLION_CONFIG.BUILDER_PRIVATE_KEY) {
       return NextResponse.json(
