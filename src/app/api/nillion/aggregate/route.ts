@@ -25,19 +25,37 @@ const NILLION_CONFIG = {
 
 const COLLECTION_ID = 'zcash-analytics-collection';
 
+// CORS headers
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+// OPTIONS handler for preflight requests
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders,
+  });
+}
+
 // GET endpoint for health check
 export async function GET(request: NextRequest) {
-  return NextResponse.json({
-    status: 'ok',
-    message: 'Nillion Aggregate API is available',
-    config: {
-      hasPrivateKey: !!NILLION_CONFIG.BUILDER_PRIVATE_KEY,
-      nilchainUrl: NILLION_CONFIG.NILCHAIN_URL,
-      nilauthUrl: NILLION_CONFIG.NILAUTH_URL,
-      nodeCount: NILLION_CONFIG.NILDB_NODES.length,
+  return NextResponse.json(
+    {
+      status: 'ok',
+      message: 'Nillion Aggregate API is available',
+      config: {
+        hasPrivateKey: !!NILLION_CONFIG.BUILDER_PRIVATE_KEY,
+        nilchainUrl: NILLION_CONFIG.NILCHAIN_URL,
+        nilauthUrl: NILLION_CONFIG.NILAUTH_URL,
+        nodeCount: NILLION_CONFIG.NILDB_NODES.length,
+      },
+      usage: 'POST to this endpoint to compute aggregated analytics confidentially',
     },
-    usage: 'POST to this endpoint to compute aggregated analytics confidentially',
-  });
+    { headers: corsHeaders }
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -47,7 +65,7 @@ export async function POST(request: NextRequest) {
     if (!NILLION_CONFIG.BUILDER_PRIVATE_KEY) {
       return NextResponse.json(
         { success: false, error: 'Missing NILLION_BUILDER_PRIVATE_KEY' },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       );
     }
 
@@ -86,17 +104,20 @@ export async function POST(request: NextRequest) {
     const allData = queryResult.data || [];
     
     if (allData.length === 0) {
-      return NextResponse.json({
-        success: true,
-        data: {
-          totalRecords: 0,
-          totalPageViews: 0,
-          avgSessionDuration: 0,
-          totalInteractions: 0,
-          categoryBreakdown: {},
-          platformBreakdown: {},
+      return NextResponse.json(
+        {
+          success: true,
+          data: {
+            totalRecords: 0,
+            totalPageViews: 0,
+            avgSessionDuration: 0,
+            totalInteractions: 0,
+            categoryBreakdown: {},
+            platformBreakdown: {},
+          },
         },
-      });
+        { headers: corsHeaders }
+      );
     }
 
     // Compute aggregates using nilCC - operations on encrypted shares
@@ -124,21 +145,24 @@ export async function POST(request: NextRequest) {
       computedOn: 'encrypted shares',
     });
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        totalRecords: allData.length,
-        totalPageViews,
-        avgSessionDuration: Math.round(totalSessionDuration / allData.length),
-        totalInteractions,
-        categoryBreakdown,
-        platformBreakdown,
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          totalRecords: allData.length,
+          totalPageViews,
+          avgSessionDuration: Math.round(totalSessionDuration / allData.length),
+          totalInteractions,
+          categoryBreakdown,
+          platformBreakdown,
+        },
+        metadata: {
+          computeMethod: 'nilCC confidential compute',
+          privacyGuarantee: 'Individual data never exposed',
+        },
       },
-      metadata: {
-        computeMethod: 'nilCC confidential compute',
-        privacyGuarantee: 'Individual data never exposed',
-      },
-    });
+      { headers: corsHeaders }
+    );
   } catch (error) {
     console.error('Aggregation error:', error);
     
@@ -152,7 +176,8 @@ export async function POST(request: NextRequest) {
       const allData = Array.from(demoDataStore.values());
       
       if (allData.length === 0) {
-        return NextResponse.json({
+        return NextResponse.json(
+        {
           success: true,
           data: {
             totalRecords: 0,
@@ -163,7 +188,9 @@ export async function POST(request: NextRequest) {
             platformBreakdown: {},
           },
           demo: true,
-        });
+        },
+        { headers: corsHeaders }
+        );
       }
       
       const totalPageViews = allData.reduce((sum, d: any) => sum + (d.pageViews || 0), 0);
@@ -180,7 +207,8 @@ export async function POST(request: NextRequest) {
         platformBreakdown[d.platform] = (platformBreakdown[d.platform] || 0) + 1;
       });
       
-      return NextResponse.json({
+      return NextResponse.json(
+        {
         success: true,
         data: {
           totalRecords: allData.length,
@@ -191,12 +219,14 @@ export async function POST(request: NextRequest) {
           platformBreakdown,
         },
         demo: true,
-      });
+      },
+      { headers: corsHeaders }
+      );
     }
     
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

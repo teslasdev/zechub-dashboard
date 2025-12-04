@@ -26,20 +26,38 @@ const NILLION_CONFIG = {
 
 const COLLECTION_ID = 'zcash-analytics-collection';
 
+// CORS headers
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+// OPTIONS handler for preflight requests
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders,
+  });
+}
+
 // GET endpoint for health check
 export async function GET(request: NextRequest) {
-  return NextResponse.json({
-    status: 'ok',
-    message: 'Nillion Store API is available',
-    config: {
-      hasPrivateKey: !!NILLION_CONFIG.BUILDER_PRIVATE_KEY,
-      nilchainUrl: NILLION_CONFIG.NILCHAIN_URL,
-      nilauthUrl: NILLION_CONFIG.NILAUTH_URL,
-      nodeCount: NILLION_CONFIG.NILDB_NODES.length,
+  return NextResponse.json(
+    {
+      status: 'ok',
+      message: 'Nillion Store API is available',
+      config: {
+        hasPrivateKey: !!NILLION_CONFIG.BUILDER_PRIVATE_KEY,
+        nilchainUrl: NILLION_CONFIG.NILCHAIN_URL,
+        nilauthUrl: NILLION_CONFIG.NILAUTH_URL,
+        nodeCount: NILLION_CONFIG.NILDB_NODES.length,
+      },
+      usage: 'POST to this endpoint with analytics data to store privately',
+      requiredFields: ['userId', 'timestamp', 'pageViews', 'sessionDuration', 'interactions', 'category', 'platform'],
     },
-    usage: 'POST to this endpoint with analytics data to store privately',
-    requiredFields: ['userId', 'timestamp', 'pageViews', 'sessionDuration', 'interactions', 'category', 'platform'],
-  });
+    { headers: corsHeaders }
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -50,7 +68,7 @@ export async function POST(request: NextRequest) {
     if (!NILLION_CONFIG.BUILDER_PRIVATE_KEY) {
       return NextResponse.json(
         { success: false, error: 'Missing NILLION_BUILDER_PRIVATE_KEY' },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       );
     }
 
@@ -115,13 +133,16 @@ export async function POST(request: NextRequest) {
       nodes: NILLION_CONFIG.NILDB_NODES.length,
     });
 
-    return NextResponse.json({
-      success: true,
-      id: documentId,
-      created: response.data.created,
-      errors: response.data.errors,
-      message: 'Analytics data encrypted and stored across nilDB nodes',
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        id: documentId,
+        created: response.data.created,
+        errors: response.data.errors,
+        message: 'Analytics data encrypted and stored across nilDB nodes',
+      },
+      { headers: corsHeaders }
+    );
   } catch (error) {
     console.error('Storage error:', error);
     
@@ -149,17 +170,20 @@ export async function POST(request: NextRequest) {
       
       demoDataStore.set(documentId, document);
       
-      return NextResponse.json({
-        success: true,
-        id: documentId,
-        message: 'Analytics data stored in demo mode',
-        demo: true,
-      });
+      return NextResponse.json(
+        {
+          success: true,
+          id: documentId,
+          message: 'Analytics data stored in demo mode',
+          demo: true,
+        },
+        { headers: corsHeaders }
+      );
     }
     
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

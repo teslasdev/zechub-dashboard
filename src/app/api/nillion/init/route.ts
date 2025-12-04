@@ -25,20 +25,38 @@ const NILLION_CONFIG = {
 
 const COLLECTION_ID = 'zcash-analytics-collection';
 
+// CORS headers
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+// OPTIONS handler for preflight requests
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders,
+  });
+}
+
 // GET endpoint for health check
 export async function GET(request: NextRequest) {
-  return NextResponse.json({
-    status: 'ok',
-    message: 'Nillion Init API is available',
-    config: {
-      hasPrivateKey: !!NILLION_CONFIG.BUILDER_PRIVATE_KEY,
-      nilchainUrl: NILLION_CONFIG.NILCHAIN_URL,
-      nilauthUrl: NILLION_CONFIG.NILAUTH_URL,
-      nodeCount: NILLION_CONFIG.NILDB_NODES.length,
-      nodeEnv: process.env.NODE_ENV,
+  return NextResponse.json(
+    {
+      status: 'ok',
+      message: 'Nillion Init API is available',
+      config: {
+        hasPrivateKey: !!NILLION_CONFIG.BUILDER_PRIVATE_KEY,
+        nilchainUrl: NILLION_CONFIG.NILCHAIN_URL,
+        nilauthUrl: NILLION_CONFIG.NILAUTH_URL,
+        nodeCount: NILLION_CONFIG.NILDB_NODES.length,
+        nodeEnv: process.env.NODE_ENV,
+      },
+      usage: 'POST to this endpoint to initialize Nillion service',
     },
-    usage: 'POST to this endpoint to initialize Nillion service',
-  });
+    { headers: corsHeaders }
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -60,7 +78,7 @@ export async function POST(request: NextRequest) {
           error: 'Missing NILLION_BUILDER_PRIVATE_KEY - Configure in Vercel environment variables',
           hint: 'Add NILLION_BUILDER_PRIVATE_KEY to your Vercel project settings'
         },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       );
     }
 
@@ -100,11 +118,14 @@ export async function POST(request: NextRequest) {
       if (authError?.response?.status === 412 || authError?.response?.status === 401 || 
           authError?._tag === 'NilauthUnreachable') {
         console.warn('⚠️  Authentication failed (412/401), falling back to demo mode');
-        return NextResponse.json({ 
-          success: true, 
-          demo: true,
-          message: 'Using demo mode - Nillion SDK authentication unavailable'
-        });
+        return NextResponse.json(
+          { 
+            success: true, 
+            demo: true,
+            message: 'Using demo mode - Nillion SDK authentication unavailable'
+          },
+          { headers: corsHeaders }
+        );
       }
       throw authError;
     }
@@ -166,31 +187,40 @@ export async function POST(request: NextRequest) {
       // Check for 401 Unauthorized errors - fall back to demo mode
       if (Array.isArray(error) && error.some((e: any) => e.error?.status === 401)) {
         console.warn('⚠️  Unauthorized error accessing collections, falling back to demo mode');
-        return NextResponse.json({ 
-          success: true, 
-          demo: true,
-          message: 'Using demo mode - Nillion SDK authorization failed'
-        });
+        return NextResponse.json(
+          { 
+            success: true, 
+            demo: true,
+            message: 'Using demo mode - Nillion SDK authorization failed'
+          },
+          { headers: corsHeaders }
+        );
       }
       
       console.error('Collection access error:', error);
       // Fall back to demo mode on any collection error
       console.warn('⚠️  Collection access failed, falling back to demo mode');
-      return NextResponse.json({ 
-        success: true, 
-        demo: true,
-        message: 'Using demo mode - Nillion SDK collection access failed'
-      });
+      return NextResponse.json(
+        { 
+          success: true, 
+          demo: true,
+          message: 'Using demo mode - Nillion SDK collection access failed'
+        },
+        { headers: corsHeaders }
+      );
     }
 
     console.log('Nillion service initialized successfully');
 
-    return NextResponse.json({
-      success: true,
-      message: 'Nillion service initialized',
-      builderDid,
-      collectionId,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Nillion service initialized',
+        builderDid,
+        collectionId,
+      },
+      { headers: corsHeaders }
+    );
   } catch (error) {
     console.error('❌ Nillion init error:', error);
     console.error('Error details:', {
@@ -209,13 +239,16 @@ export async function POST(request: NextRequest) {
       console.log('💡 To use real Nillion: subscribe at https://subscription.nillion.com/');
       
       // Return success in demo mode
-      return NextResponse.json({
-        success: true,
-        message: 'Demo mode - Nillion subscription required for production',
-        builderDid: 'demo-did',
-        collectionId: 'demo-collection-id',
-        demo: true,
-      });
+      return NextResponse.json(
+        {
+          success: true,
+          message: 'Demo mode - Nillion subscription required for production',
+          builderDid: 'demo-did',
+          collectionId: 'demo-collection-id',
+          demo: true,
+        },
+        { headers: corsHeaders }
+      );
     }
 
     return NextResponse.json(
@@ -225,7 +258,7 @@ export async function POST(request: NextRequest) {
         errorType: error instanceof Error ? error.constructor.name : typeof error,
         stack: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : undefined) : undefined
       },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
