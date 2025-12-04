@@ -15,6 +15,7 @@ import { formatNumberShort, getDifficultyData } from "@/app/lib/chart/helpers";
 import { DATA_URL } from "@/app/lib/chart/data-url";
 import { ErrorBoundary } from "../ErrorBoundary/ErrorBoundary";
 import { useInMobile } from "@/app/hooks/useInMobile";
+import { useResponsiveFontSize } from "@/app/hooks/useResponsiveFontSize";
 
 
 
@@ -25,7 +26,7 @@ type DifficultyChartProps = {
 export default function DifficultyChart(props: DifficultyChartProps) {
   const [difficulty, setDifficulty] = useState<Difficulty[]>([]);
   const [loading, setLoading] = useState(false);
-  const fontSize = 12;
+  const fontSize = useResponsiveFontSize();
   const isMobile = useInMobile();
 
   useEffect(() => {
@@ -124,6 +125,8 @@ export default function DifficultyChart(props: DifficultyChartProps) {
               );
             }}
           />
+
+          
 
           <Area
             type="monotone"

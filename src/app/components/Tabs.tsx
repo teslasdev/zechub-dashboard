@@ -48,7 +48,7 @@ export const TabsTrigger = ({
   <button
     className={`px-3 py-2 text-[16px] cursor-pointer inline-flex shrink-0 font-medium rounded-md transition-colors ${
       activeTab === value
-        ? "bg-background text-[#ffffff] shadow-sm"
+        ? "bg-background dark:text-[#ffffff] text-[#2F78BE] shadow-sm"
         : "text-[#969696] hover:text-[#969696]"
     }`}
     onClick={() => setActiveTab(value)}

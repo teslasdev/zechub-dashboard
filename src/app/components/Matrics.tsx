@@ -16,33 +16,34 @@ export default function MetricCard({
   titleIcon,
 }: MetricCardProps) {
   return (
-    <div className="relative group">
+    <div className="relative group w-full">
       {/* Radiant Border Container */}
-      <div className="radiant-ui-border p-px rounded-2xl bg-linear-to-r from-white/20 via-transparent to-transparent w-[350px]">
-        <div className="bg-[#050915] w-full h-full rounded-2xl p-6 backdrop-blur-sm">
-          <h3 className="text-gray-400 text-sm font-medium mb-2 flex items-center gap-2">
+      <div className="radiant-ui-border p-px rounded-2xl bg-linear-to-r light:from-white/20 via-transparent to-transparent w-full max-w-[350px] mx-auto">
+        <div className="bg-[#050915] w-full h-full rounded-2xl p-4 sm:p-6 backdrop-blur-sm">
+          <h3 className="dark:text-gray-400 text-gray-800 text-xs sm:text-sm font-medium mb-2 flex items-center gap-2">
             {titleIcon && (
-              <Image src={titleIcon} alt={title} width={28} height={28} />
+              <Image src={titleIcon} alt={title} width={24} height={24} className="sm:w-[28px] sm:h-[28px]" />
             )}{" "}
             {title}
           </h3>
           <div className="items-baseline justify-between">
-            <span className="text-xl my-2 font-semibold plus-jakarta-sans text-white">{value}</span>
+            <span className="text-lg sm:text-xl my-2 font-semibold plus-jakarta-sans text-white">{value}</span>
             <div className="flex items-center mt-2 justify-between">
-              <div className={`flex ${change >= 0 ? "bg-[#0AA38240]" : "bg-[#C60C0C40]"} w-fit p-2 rounded-full justify-center items-center`}>
+              <div className={`flex ${change >= 0 ? "bg-[#0AA38240]" : "bg-[#C60C0C40]"} w-fit p-1.5 sm:p-2 rounded-full justify-center items-center`}>
                 <span
-                  className={`text-[12px]  ${
+                  className={`text-[10px] sm:text-[12px] ${
                     change >= 0 ? "text-[#0AA382]" : "text-[#C60C0C]"
                   }`}
                 >
-                  {change}%
+                  {change >= 0 ? `+${change}%` : `${change}%`}
                 </span>
                 {change >= 0 ? (
                   <Image
                     src={require("../../assets/up_market.png")}
                     alt="Up Arrow"
-                    width={16}
-                    height={16}
+                    width={14}
+                    height={14}
+                    className="sm:w-4 sm:h-4"
                   />
                 ) : (
                   <Image

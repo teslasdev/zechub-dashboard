@@ -1,4 +1,4 @@
-import { Issuance } from "@/lib/chart/types";
+import { Issuance } from "@/app/lib/chart/types";
 import { useEffect, useState } from "react";
 
 export const useIssuanceData = (url: string) => {

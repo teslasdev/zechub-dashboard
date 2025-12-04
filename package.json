@@ -9,7 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@nillion/nuc": "^1.1.0",
+    "@nillion/secretvaults": "^1.0.0",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
     "flowbite-react": "^0.12.10",
     "next": "16.0.4",
     "react": "19.2.0",
@@ -22,8 +25,10 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "baseline-browser-mapping": "^2.9.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.4",
+    "ignore-loader": "^0.1.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

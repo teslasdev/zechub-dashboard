@@ -1,0 +1,156 @@
+
+> zechlub-dashboard@0.1.0 dev
+> next dev
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   ▲ Next.js 16.0.4 (Turbopack)
+   - Local:         http://localhost:3000
+   - Network:       http://192.168.1.84:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 2.3s
+ ○ Compiling /privacy-analytics ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ GET /privacy-analytics 200 in 15.5s (compile: 15.1s, render: 438ms)
+ POST /api/nillion/init 200 in 2.1s
+(node:88497) ExperimentalWarning: Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Subscription status: {
+  subscribed: true,
+  details: { expiresAt: 1767274332000, renewableAt: 1766669532000 }
+}
+Subscription status: {
+  subscribed: true,
+  details: { expiresAt: 1767274332000, renewableAt: 1766669532000 }
+}
+Builder already registered (continuing...)
+Fetching existing collections...
+Builder already registered (continuing...)
+Fetching existing collections...
+Collections found: { data: [], pagination: { total: 0, limit: 1000, offset: 0 } }
+Collection not found, creating new one...
+Collections found: { data: [], pagination: { total: 0, limit: 1000, offset: 0 } }
+Collection not found, creating new one...
+Collection access error: [
+  {
+    node: 'did:key:zQ3shcivRHjnU2ASFFTFC3Y1uoLAqEhTTqMKHGUundhcywNy7',
+    error: {
+      message: 'Request failed: POST https://nildb-stg-n1.nillion.network/v1/collections',
+      body: [Object],
+      status: 400
+    }
+  },
+  {
+    node: 'did:key:zQ3shTJe9zjBPfhcykspLMjLpCwcBHqowGcpmvuY3tiR3jvHD',
+    error: {
+      message: 'Request failed: POST https://nildb-stg-n2.nillion.network/v1/collections',
+      body: [Object],
+      status: 400
+    }
+  },
+  {
+    node: 'did:key:zQ3sheuiqFDDhsiMcEdfHcGFbqbfAA1ttqDsSaLaUTk9LQfpe',
+    error: {
+      message: 'Request failed: POST https://nildb-stg-n3.nillion.network/v1/collections',
+      body: [Object],
+      status: 400
+    }
+  }
+]
+⚠️  Collection access failed, falling back to demo mode
+ POST /api/nillion/init 200 in 20.6s (compile: 12.3s, render: 8.3s)
+Collection access error: [
+  {
+    node: 'did:key:zQ3shcivRHjnU2ASFFTFC3Y1uoLAqEhTTqMKHGUundhcywNy7',
+    error: {
+      message: 'Request failed: POST https://nildb-stg-n1.nillion.network/v1/collections',
+      body: [Object],
+      status: 400
+    }
+  },
+  {
+    node: 'did:key:zQ3shTJe9zjBPfhcykspLMjLpCwcBHqowGcpmvuY3tiR3jvHD',
+    error: {
+      message: 'Request failed: POST https://nildb-stg-n2.nillion.network/v1/collections',
+      body: [Object],
+      status: 400
+    }
+  },
+  {
+    node: 'did:key:zQ3sheuiqFDDhsiMcEdfHcGFbqbfAA1ttqDsSaLaUTk9LQfpe',
+    error: {
+      message: 'Request failed: POST https://nildb-stg-n3.nillion.network/v1/collections',
+      body: [Object],
+      status: 400
+    }
+  }
+]
+⚠️  Collection access failed, falling back to demo mode
+Aggregation error: Error: Collection zcash-analytics-collection not found. Please initialize first.
+    at POST (src/app/api/nillion/aggregate/route.ts:60:13)
+  58 |     
+  59 |     if (!collection) {
+> 60 |       throw new Error(`Collection ${COLLECTION_ID} not found. Please initialize first.`);
+     |             ^
+  61 |     }
+  62 |
+  63 |     // Query all analytics data from nilDB
+⚠️  Falling back to demo aggregation
+ POST /api/nillion/aggregate 200 in 3.1s (compile: 625ms, render: 2.5s)
+Subscription status: {
+  subscribed: true,
+  details: { expiresAt: 1767274332000, renewableAt: 1766669532000 }
+}
+Builder already registered (continuing...)
+Fetching existing collections...
+Collections found: { data: [], pagination: { total: 0, limit: 1000, offset: 0 } }
+Collection not found, creating new one...
+Collection access error: [
+  {
+    node: 'did:key:zQ3shcivRHjnU2ASFFTFC3Y1uoLAqEhTTqMKHGUundhcywNy7',
+    error: {
+      message: 'Request failed: POST https://nildb-stg-n1.nillion.network/v1/collections',
+      body: [Object],
+      status: 400
+    }
+  },
+  {
+    node: 'did:key:zQ3shTJe9zjBPfhcykspLMjLpCwcBHqowGcpmvuY3tiR3jvHD',
+    error: {
+      message: 'Request failed: POST https://nildb-stg-n2.nillion.network/v1/collections',
+      body: [Object],
+      status: 400
+    }
+  },
+  {
+    node: 'did:key:zQ3sheuiqFDDhsiMcEdfHcGFbqbfAA1ttqDsSaLaUTk9LQfpe',
+    error: {
+      message: 'Request failed: POST https://nildb-stg-n3.nillion.network/v1/collections',
+      body: [Object],
+      status: 400
+    }
+  }
+]
+⚠️  Collection access failed, falling back to demo mode
+ POST /api/nillion/init 200 in 4.9s (compile: 5ms, render: 4.9s)
+Storage error: Error: Collection zcash-analytics-collection not found. Please initialize first.
+    at POST (src/app/api/nillion/store/route.ts:63:13)
+  61 |     
+  62 |     if (!collection) {
+> 63 |       throw new Error(`Collection ${COLLECTION_ID} not found. Please initialize first.`);
+     |             ^
+  64 |     }
+  65 |
+  66 |     // Generate unique document ID
+⚠️  Falling back to demo storage
+TypeError: Body is unusable: Body has already been read
+    at POST (src/app/api/nillion/store/route.ts:116:34)
+  114 |       console.log('⚠️  Falling back to demo storage');
+  115 |       
+> 116 |       const data = await request.json();
+      |                                  ^
+  117 |       const documentId = crypto.randomUUID();
+  118 |       
+  119 |       const document = {
+ POST /api/nillion/store 500 in 3.7s (compile: 593ms, render: 3.1s)

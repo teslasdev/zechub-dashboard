@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export const useResponsiveFontSize = (min = 10, max = 16) => {
+export const useResponsiveFontSize = (min = 10, max = 12) => {
   const [fontSize, setFontSize] = useState(10);
 
   useEffect(() => {

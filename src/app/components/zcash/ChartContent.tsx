@@ -2,6 +2,12 @@ import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Tabs";
 import DifficultyChart from "../charts/DifficultyChart";
 import NetInflowsOutflowsChart from "../charts/NetInflowsOutflowsChart";
+import PrivacySetVisualizationChart from "../charts/PrivacySetVisualizationChart";
+import NodeCountChart from "../charts/NodeCountChart";
+import ShieldedSupplyChart from "../charts/ShieldedSupplyChart";
+import IssuanceChart from "../charts/IssuanceChart";
+import LockboxChart from "../charts/LockboxChart";
+import TransactionsSummaryChart from "../charts/TransactionSummaryChart";
 
 const ChartContent = () => {
   const tabLabels = [
@@ -90,7 +96,7 @@ const ChartContent = () => {
           />
         </svg>
       ),
-      name: "Shielded Stats",
+      name: "Lockbox",
     },
   ];
   const [activeTab, setActiveTab] = useState("Network Health");
@@ -117,22 +123,70 @@ const ChartContent = () => {
 
             <TabsContent value="Network Health" activeTab={activeTab}>
               <div className="flex items-center flex-wrap gap-4 w-full">
-                <div className="w-[25%] rounded-xl h-[359px] p-2 bg-[#010411] flex-1">
+                <div className="w-[25%] rounded-xl flex flex-col gap-4 h-[359px] p-2 dark:bg-[#8079b21a] bg-[#010411] flex-1">
+                   <div className="border-b flex items-center w-full border-[#FFFFFF1A] h-[46px] px-4">
+                    Diffuculty Chart
+                  </div>
                   <DifficultyChart />
                 </div>
-                <div className="w-[25%] rounded-xl h-[359px] p-2 bg-[#010411] flex-1">
-                  <DifficultyChart />
+                <div className="w-[25%] rounded-xl h-[359px] flex flex-col gap-4 p-2 dark:bg-[#8079b21a] bg-[#010411] flex-1">
+                   <div className="border-b flex items-center w-full border-[#FFFFFF1A] h-[46px] px-4">
+                    Node Count Chart
+                  </div>
+                  <NodeCountChart />
                 </div>
-                <div className="w-full mt-8 rounded-xl h-[359px] p-2 bg-[#010411]">
-                  <DifficultyChart />
+                <div className="w-full mt-8 rounded-xl h-[359px] p-2 dark:bg-[#8079b21a] bg-[#010411]">
+                   <div className="border-b flex items-center w-full border-[#FFFFFF1A] h-[46px] px-4">
+                    Shielded Supply Chart
+                  </div>
+                  <ShieldedSupplyChart />
                 </div>
               </div>
-              
+            </TabsContent>
+            <TabsContent value="Monetary System" activeTab={activeTab}>
+              <div className="flex items-center flex-wrap gap-4 w-full">
+                <div className="w-full rounded-xl flex flex-col justify-center items-center gap-4 h-[459px] p-2 dark:bg-[#8079b21a] bg-[#010411] flex-1">
+                  <div className="border-b flex items-center w-full border-[#FFFFFF1A] h-[46px] px-4">
+                    Issuance Vs. Inflation
+                  </div>
+                  <IssuanceChart />
+                </div>
+                
+                <div className="w-full mt-8 rounded-xl flex flex-col justify-center items-center gap-4 h-[459px] p-2 dark:bg-[#8079b21a] bg-[#010411]">
+                  <div className="border-b flex items-center w-full border-[#FFFFFF1A] h-[46px] px-4">
+                    Transaction Sumaary
+                  </div>
+                  <TransactionsSummaryChart />
+                </div>
+              </div>
             </TabsContent>
             <TabsContent value="Flow" activeTab={activeTab}>
-              <div className="w-full mt-8 rounded-xl h-[500px] p-2 bg-[#010411]">
-                  <NetInflowsOutflowsChart />
+              <div className="w-full mt-8 rounded-xl h-[500px] p-2 bg-[#ffffff] dark:bg-[#010411]">
+                <div className="border-b flex items-center w-full border-[#FFFFFF1A] h-[46px] px-4">
+                  Inflow Vs. Outflow
                 </div>
+                <NetInflowsOutflowsChart />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="Privacy" activeTab={activeTab}>
+              <div className="w-full mt-8 rounded-xl flex flex-col gap-4 justify-center items-center h-[650px] p-2 dark:bg-[#8079b21a] bg-[#010411]">
+                <div className="border-b flex items-center w-full border-[#FFFFFF1A] h-[46px] px-4">
+                  Privacy Sets
+                </div>
+                <PrivacySetVisualizationChart />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="Lockbox" activeTab={activeTab}>
+              <div className="flex items-center flex-wrap gap-4 w-full">
+                <div className="w-full rounded-xl flex-col justify-center items-center gap-4 h-[500px] p-2 pb-24 dark:bg-[#8079b21a] bg-[#010411] flex-1">
+                  <div className="border-b flex items-center w-full border-[#FFFFFF1A] h-[46px] px-4">
+                    Lockbox
+                  </div>
+                  <LockboxChart />
+                </div>
+              </div>
             </TabsContent>
           </>
         )}

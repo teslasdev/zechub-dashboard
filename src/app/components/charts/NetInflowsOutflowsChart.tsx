@@ -101,50 +101,35 @@ export default function NetInflowsOutflowsChart(
           />
 
           <Tooltip
-            formatter={(value: any, name: string) => [
-              typeof value === "number"
-                ? `${value.toLocaleString()} ZEC`
-                : value,
-              name === "Net Sapling Flow"
-                ? "Net Sapling Flow"
-                : "Net Orchard Flow",
-            ]}
-            labelFormatter={(label) => dateFns.format(new Date(label), "PPP")}
-            contentStyle={{
-              backgroundColor: "#fff",
-              border: "1px solid #e5e7eb",
-              fontSize: "0.875rem",
-            }}
-            labelStyle={{ color: "#64748b" }}
-            itemStyle={{ color: "#0f172a" }}
-            cursor={{ fill: "#3b82f6", fillOpacity: 0.1 }}
-          />
+              content={({ active, payload, label }) => {
+                if (!active || !payload?.length) return null;
+                return (
+                  <div
+                    className="rounded-md px-3 py-2 shadow-md border text-sm"
+                    style={{
+                      backgroundColor: "#1e293b", // dark bg
+                      borderColor: "#334155",
+                      color: "#f1f5f9", // default text
+                    }}
+                  >
+                    <p className="text-slate-100 font-semibold mb-2">{label}</p>
+                    {payload.map((entry, idx) => (
+                      <div
+                        key={idx}
+                        className="flex justify-between gap-4"
+                        style={{ color: entry.color }}
+                      >
+                        <span>{entry.name}</span>
+                        <span className="text-slate-50">
+                          {entry.value?.toLocaleString()} ZEC
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }}
+            />
 
-          <Legend
-            align="center"
-            content={() => (
-              <div className="pt-5 flex justify-center gap-6 text-sm mt-2 text-slate-600 dark:text-slate-300">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="w-3 h-3 inline-block rounded-sm"
-                    style={{
-                      background: "#ec4899",
-                    }}
-                  />
-                  <p>Net Orchard Flow</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className="w-3 h-3 inline-block rounded-sm"
-                    style={{
-                      background: "#3b82f6",
-                    }}
-                  />
-                  <p>Net Sapling Flow</p>
-                </div>
-              </div>
-            )}
-          />
           <Bar
             dataKey="netSaplingFlow"
             name="Net Sapling Flow"
