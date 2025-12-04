@@ -25,11 +25,41 @@ const NILLION_CONFIG = {
 
 const COLLECTION_ID = 'zcash-analytics-collection';
 
+// GET endpoint for health check
+export async function GET(request: NextRequest) {
+  return NextResponse.json({
+    status: 'ok',
+    message: 'Nillion Init API is available',
+    config: {
+      hasPrivateKey: !!NILLION_CONFIG.BUILDER_PRIVATE_KEY,
+      nilchainUrl: NILLION_CONFIG.NILCHAIN_URL,
+      nilauthUrl: NILLION_CONFIG.NILAUTH_URL,
+      nodeCount: NILLION_CONFIG.NILDB_NODES.length,
+      nodeEnv: process.env.NODE_ENV,
+    },
+    usage: 'POST to this endpoint to initialize Nillion service',
+  });
+}
+
 export async function POST(request: NextRequest) {
+  console.log('🔵 Nillion Init API called');
+  console.log('Environment check:', {
+    hasPrivateKey: !!NILLION_CONFIG.BUILDER_PRIVATE_KEY,
+    nilchainUrl: NILLION_CONFIG.NILCHAIN_URL,
+    nilauthUrl: NILLION_CONFIG.NILAUTH_URL,
+    nodeCount: NILLION_CONFIG.NILDB_NODES.length,
+    nodeEnv: process.env.NODE_ENV,
+  });
+  
   try {
     if (!NILLION_CONFIG.BUILDER_PRIVATE_KEY) {
+      console.error('❌ Missing NILLION_BUILDER_PRIVATE_KEY environment variable');
       return NextResponse.json(
-        { success: false, error: 'Missing NILLION_BUILDER_PRIVATE_KEY' },
+        { 
+          success: false, 
+          error: 'Missing NILLION_BUILDER_PRIVATE_KEY - Configure in Vercel environment variables',
+          hint: 'Add NILLION_BUILDER_PRIVATE_KEY to your Vercel project settings'
+        },
         { status: 500 }
       );
     }
@@ -162,7 +192,13 @@ export async function POST(request: NextRequest) {
       collectionId,
     });
   } catch (error) {
-    console.error('Nillion init error:', error);
+    console.error('❌ Nillion init error:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown',
+      stack: error instanceof Error ? error.stack : undefined,
+      type: typeof error,
+      full: JSON.stringify(error, null, 2)
+    });
     
     // If we have auth/permission issues, fall back to demo mode
     if (error instanceof Error && 
@@ -183,7 +219,12 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
+        stack: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : undefined) : undefined
+      },
       { status: 500 }
     );
   }
