@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Space_Grotesk } from "next/font/google";
+import Head from "next/head";
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-});
 
 export const metadata: Metadata = {
   title: "Zeanalystics",
@@ -18,7 +14,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={spaceGrotesk.variable}>
+    <html lang="en">
+      <Head>
+        <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+      </Head>
       <body className="antialiased">
         {children}
       </body>

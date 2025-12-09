@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Space+Grotesk:wght@300..700&display=swap');
 @import "tailwindcss";
 
 
@@ -33,6 +34,9 @@
   --chart-23: 340 75% 60%;   /* Altcoin pink */
   --chart-24: 50 95% 55%;    /* Gold/yellow for value */
   --chart-25: 150 75% 40%;   /* Blockchain green */
+  --font-instrument: "Instrument Sans", sans-serif;
+  --font-jakarta: "Plus Jakarta Sans", sans-serif;
+  --font-space: "Space Grotesk", sans-serif;
 }
 
 @theme inline {
@@ -65,8 +69,14 @@
   --radiant-color-dark: 59, 130, 246;
 }
 
+* {
+  font-family: var(--font-instrument);
+}
+
+
+
 html {
-  font-family: var(--font-space-grotesk), sans-serif;
+  font-family: var(--font-instrument);
 }
 
 body {
