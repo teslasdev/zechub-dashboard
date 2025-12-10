@@ -10,6 +10,11 @@ import { Signer, PayerBuilder, NilauthClient } from '@nillion/nuc';
 import { SecretVaultBuilderClient } from '@nillion/secretvaults';
 import { demoDataStore } from '@/app/lib/nillion/demoStore';
 
+// Force Node.js runtime (not Edge)
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
 const NILLION_CONFIG = {
   NILCHAIN_URL: process.env.NILCHAIN_URL || 'http://rpc.testnet.nilchain-rpc-proxy.nilogy.xyz',
   NILAUTH_URL: process.env.NILAUTH_URL || 'https://nilauth.sandbox.app-cluster.sandbox.nilogy.xyz',
