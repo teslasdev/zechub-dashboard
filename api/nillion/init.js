@@ -5,12 +5,12 @@
  * Initializes Nillion service, registers builder, creates collection
  */
 
-import { Signer, PayerBuilder, NilauthClient } from '@nillion/nuc';
-import { SecretVaultBuilderClient } from '@nillion/secretvaults';
-import crypto from 'crypto';
+const { Signer, PayerBuilder, NilauthClient } = require('@nillion/nuc');
+const { SecretVaultBuilderClient } = require('@nillion/secretvaults');
+const crypto = require('crypto');
 
 // Vercel function configuration
-export const config = {
+module.exports.config = {
   maxDuration: 60,
 };
 
@@ -30,7 +30,7 @@ const NILLION_CONFIG = {
 const COLLECTION_ID = 'zcash-analytics-collection';
 
 // Vercel serverless function handler
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
